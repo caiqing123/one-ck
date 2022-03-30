@@ -23,14 +23,14 @@ class Types
     protected $arr_type = '';
 
     protected $base_types = [
-        'int8' => ['c', 1],
-        'uint8' => ['C', 1],
-        'int16' => ['s', 2],
-        'uint16' => ['S', 2],
-        'int32' => ['l', 4],
-        'uint32' => ['L', 4],
-        'int64' => ['l', 8],
-        'uint64' => ['L', 8],
+        'int8'    => ['c', 1],
+        'uint8'   => ['C', 1],
+        'int16'   => ['s', 2],
+        'uint16'  => ['S', 2],
+        'int32'   => ['l', 4],
+        'uint32'  => ['L', 4],
+        'int64'   => ['l', 8],
+        'uint64'  => ['L', 8],
         'float32' => ['f', 4],
         'float64' => ['d', 8],
     ];
@@ -39,14 +39,14 @@ class Types
     public function __construct($write, $read)
     {
         $this->write = $write;
-        $this->read = $read;
+        $this->read  = $read;
     }
 
     public function unpack($type, $row_count)
     {
-        $type = strtolower($type);
+        $type          = strtolower($type);
         $this->is_null = false;
-        $real_type = $this->alias($type);
+        $real_type     = $this->alias($type);
         if (isset($this->arr_dp[0])) {
             return $this->getArrData($row_count, $real_type);
         } else {
@@ -69,21 +69,21 @@ class Types
         $arr = [
             'decimal32' => 'float32',
             'decimal64' => 'float64',
-            'date' => 'uint16',
-            'datetime' => 'uint32',
-            'ipv4' => 'uint32',
-            'ipv6' => 'fixedstring(16)',
-            'enum8' => 'int8',
-            'enum16' => 'int16',
-            'nothing' => 'int8'
+            'date'      => 'uint16',
+            'datetime'  => 'uint32',
+            'ipv4'      => 'uint32',
+            'ipv6'      => 'fixedstring(16)',
+            'enum8'     => 'int8',
+            'enum16'    => 'int16',
+            'nothing'   => 'int8',
         ];
         if (isset($arr[$type])) {
             return $arr[$type];
         }
         if (self::isNullable($type)) {
             $this->is_null = true;
-            $tp = substr($type, 9, -1);
-            $type = $tp;
+            $tp            = substr($type, 9, -1);
+            $type          = $tp;
             return $this->alias($type);
         }
         if (self::isDecimal($type)) {
@@ -102,8 +102,8 @@ class Types
         $is_arr = false;
         while (self::isArray($type)) {
             $this->arr_dp[] = 'array';
-            $type = substr($type, 6, -1);
-            $is_arr = true;
+            $type           = substr($type, 6, -1);
+            $is_arr         = true;
         }
         if ($is_arr) {
             $this->arr_type = $type;
@@ -153,25 +153,25 @@ class Types
 
     protected function getArrData($row_count, $real_type)
     {
-        $deep = count($this->arr_dp);
-        $data = array_fill(0, $row_count, []);
-        $arr = [];
-        $els = [];
+        $deep  = count($this->arr_dp);
+        $data  = array_fill(0, $row_count, []);
+        $arr   = [];
+        $els   = [];
         $first = true;
         while ($deep--) {
             $del = [];
-            $l = count($data);
-            $p = 0;
+            $l   = count($data);
+            $p   = 0;
             foreach ($data as $i => &$val) {
                 if ($first) {
                     $arr[] = &$val;
                 }
                 $num = unpack('L', $this->read->getChar(8))[1];
-                if ($num == 0){
+                if ($num == 0) {
                     continue;
                 }
                 $val = array_fill(0, $num - $p, []);
-                $p = $num;
+                $p   = $num;
                 foreach ($val as &$v) {
                     if ($deep > 0) {
                         $data[] = &$v;
@@ -202,7 +202,7 @@ class Types
             $v = $this->col_data[$i];
         }
         $this->col_data = [];
-        $this->arr_dp = [];
+        $this->arr_dp   = [];
 
         return isset($els[0]) ? $arr : [];
     }
@@ -245,7 +245,7 @@ class Types
                 return $this->read->string();
             };
         } else if (self::isFixedString($type)) {
-            $n = intval(substr($type, 12, -1));
+            $n  = intval(substr($type, 12, -1));
             $fn = function () use ($n) {
                 return $this->read->getChar($n);
             };
@@ -272,7 +272,7 @@ class Types
      */
     protected function decodeInt128()
     {
-        $str = $this->read->getChar(16);
+        $str  = $this->read->getChar(16);
         $is_n = false;
         if (ord($str[15]) > 127) {
             $is_n = true;
@@ -302,7 +302,7 @@ class Types
         }
         $r = substr($r, 0, 8) . '-' . substr($r, 8, 4) . '-' . substr($r, 12);
 
-        $s = bin2hex($this->read->getChar(8));
+        $s  = bin2hex($this->read->getChar(8));
         $r1 = '';
         for ($i = 14; $i >= 0; $i -= 2) {
             $r1 .= $s[$i] . $s[$i + 1];
@@ -319,18 +319,18 @@ class Types
         }
 
         $call = [
-            'date' => function ($v) {
+            'date'     => function ($v) {
                 return date('Y-m-d', $v * 86400);
             },
             'datetime' => function ($v) {
                 return date('Y-m-d H:i:s', $v);
             },
-            'ipv4' => function ($v) {
+            'ipv4'     => function ($v) {
                 return long2ip($v);
             },
-            'ipv6' => function ($v) {
+            'ipv6'     => function ($v) {
                 return $this->decodeIpv6($v);
-            }
+            },
         ];
 
         $fn = null;
@@ -375,11 +375,11 @@ class Types
             $a .= $s[$i];
             if ($i < 31 && $i % 4 === 3) {
                 $r[] = ltrim($a, '0');
-                $a = '';
+                $a   = '';
             }
         }
         $r[] = ltrim($a, '0');
-        $r = implode(':', $r);
+        $r   = implode(':', $r);
         while (strpos($r, ':::') !== false) {
             $r = str_replace(':::', '::', $r);
         }
@@ -388,9 +388,9 @@ class Types
 
     public function pack($data, $type)
     {
-        $type = strtolower($type);
+        $type          = strtolower($type);
         $this->is_null = false;
-        $real_type = $this->alias($type);
+        $real_type     = $this->alias($type);
         $this->format($data, $type);
         if (isset($this->arr_dp[0])) {
             $this->setArrData($data, $type, $real_type);
@@ -411,20 +411,20 @@ class Types
             return 1;
         }
         $call = [
-            'date' => function ($v) {
+            'date'     => function ($v) {
                 return self::encodeDate($v);
             },
             'datetime' => function ($v) {
                 return self::encodeDatetime($v);
             },
-            'ipv4' => function ($v) {
+            'ipv4'     => function ($v) {
                 return self::encodeIpv4($v);
             },
-            'ipv6' => function ($v) {
+            'ipv6'     => function ($v) {
                 return self::encodeIpv6($v);
-            }
+            },
         ];
-        $fn = null;
+        $fn   = null;
         if (isset($call[$type])) {
             $fn = $call[$type];
         } else if (self::isDecimal($type)) {
@@ -441,7 +441,7 @@ class Types
                 };
             }
         } else if (self::isDatetime64($type)) {
-            $n = substr($type, 11, -1);
+            $n  = substr($type, 11, -1);
             $fn = function ($v) use ($n) {
                 return self::encodeDatetime64($v, $n);
             };
@@ -491,23 +491,23 @@ class Types
     public static function encodeDatetime64($time, $n = 3)
     {
         $ar = explode('.', $time);
-        $l = isset($ar[1]) ? strlen($ar[1]) : 0;
-        $n = strtotime($ar[0]) . (isset($ar[1]) ? $ar[1] : '') . str_repeat('0', min(max($n - $l, 0), 9));
+        $l  = isset($ar[1]) ? strlen($ar[1]) : 0;
+        $n  = strtotime($ar[0]) . (isset($ar[1]) ? $ar[1] : '') . str_repeat('0', min(max($n - $l, 0), 9));
         return $n * 1;
     }
 
     protected function setArrData($in_da, $type, $real_type)
     {
-        $data = [];
-        $index = [$in_da];
-        $r = [];
+        $data   = [];
+        $index  = [$in_da];
+        $r      = [];
         $arr_dp = 0;
         while (true) {
             $del = [];
-            $j = 0;
+            $j   = 0;
             foreach ($index as $i => $val) {
-                $j += count($val);
-                $r[] = $j;
+                $j     += count($val);
+                $r[]   = $j;
                 $del[] = $i;
                 if (isset($val[0]) && is_array($val[0])) {
                     foreach ($val as $v) {
@@ -552,7 +552,7 @@ class Types
             foreach ($data as $i => &$v) {
                 if ($v === null) {
                     $this->is_null_data[$i] = 1;
-                    $v = 0;
+                    $v                      = 0;
                 } else {
                     $this->is_null_data[$i] = 0;
                 }
@@ -595,7 +595,7 @@ class Types
                 $this->write->string([$v]);
             };
         } else if (self::isFixedString($real_type)) {
-            $n = intval(substr($real_type, 12, -1));
+            $n  = intval(substr($real_type, 12, -1));
             $fn = function ($v) use ($n) {
                 $this->write->addBuf(self::encodeFixedString($v, $n));
             };
@@ -653,7 +653,7 @@ class Types
 
     public static function encodeUuid($data)
     {
-        $s = str_replace('-', '', $data);
+        $s  = str_replace('-', '', $data);
         $r1 = substr($s, 0, 8);
         $r2 = substr($s, 8, 8);
         $r3 = substr($s, 16, 8);

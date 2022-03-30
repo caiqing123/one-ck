@@ -4,15 +4,15 @@ namespace OneCk;
 
 class Client
 {
-    const NAME = 'PHP-ONE-CLIENT';
-    const VERSION = 54213;
-    const VERSION_MAJOR = 1;
-    const VERSION_MINOR = 1;
-    const DBMS_MIN_V_TEMPORARY_TABLES = 50264;
-    const DBMS_MIN_V_TOTAL_ROWS_IN_PROGRESS = 51554;
-    const DBMS_MIN_V_BLOCK_INFO = 51903;
-    const DBMS_MIN_V_CLIENT_INFO = 54032;
-    const DBMS_MIN_V_SERVER_TIMEZONE = 54058;
+    const NAME                                = 'PHP-ONE-CLIENT';
+    const VERSION                             = 54213;
+    const VERSION_MAJOR                       = 1;
+    const VERSION_MINOR                       = 1;
+    const DBMS_MIN_V_TEMPORARY_TABLES         = 50264;
+    const DBMS_MIN_V_TOTAL_ROWS_IN_PROGRESS   = 51554;
+    const DBMS_MIN_V_BLOCK_INFO               = 51903;
+    const DBMS_MIN_V_CLIENT_INFO              = 54032;
+    const DBMS_MIN_V_SERVER_TIMEZONE          = 54058;
     const DBMS_MIN_V_QUOTA_KEY_IN_CLIENT_INFO = 54060;
     /**
      * @var resource
@@ -38,16 +38,16 @@ class Client
 
     public function __construct($dsn = 'tcp://127.0.0.1:9000', $username = 'default', $password = '', $database = 'default', $options = [])
     {
-        $time_out = isset($options['time_out']) ? $options['time_out'] : 3;
+        $time_out   = isset($options['time_out']) ? $options['time_out'] : 3;
         $this->conn = stream_socket_client($dsn, $code, $msg, $time_out);
         if (!$this->conn) {
             throw new CkException($msg, $code);
         }
         stream_set_timeout($this->conn, $time_out * 10);
         $this->write = new Write($this->conn);
-        $this->read = new Read($this->conn);
+        $this->read  = new Read($this->conn);
         $this->types = new Types($this->write, $this->read);
-        $this->conf = [$username, $password, $database];
+        $this->conf  = [$username, $password, $database];
         $this->hello($username, $password, $database);
     }
 
@@ -70,11 +70,11 @@ class Client
      */
     private function receive()
     {
-        $this->_row_data = [];
+        $this->_row_data  = [];
         $this->_total_row = 0;
-        $this->fields = [];
-        $_progress_info = [];
-        $_profile_info = [];
+        $this->fields     = [];
+        $_progress_info   = [];
+        $_profile_info    = [];
 
         $code = null;
         do {
@@ -97,8 +97,8 @@ class Client
                     continue 2;
                 case Protocol::SERVER_PROGRESS:
                     $_progress_info = [
-                        'rows' => $this->read->number(),
-                        'bytes' => $this->read->number(),
+                        'rows'       => $this->read->number(),
+                        'bytes'      => $this->read->number(),
                         'total_rows' => $this->gtV(self::DBMS_MIN_V_TOTAL_ROWS_IN_PROGRESS) ? $this->read->number() : 0,
                     ];
                     break;
@@ -113,12 +113,12 @@ class Client
 //                    ];
                 case Protocol::SERVER_PROFILE_INFO:
                     $_profile_info = [
-                        'rows' => $this->read->number(),
-                        'blocks' => $this->read->number(),
-                        'bytes' => $this->read->number(),
-                        'applied_limit' => $this->read->number(),
-                        'rows_before_limit' => $this->read->number(),
-                        'calculated_rows_before_limit' => $this->read->number()
+                        'rows'                         => $this->read->number(),
+                        'blocks'                       => $this->read->number(),
+                        'bytes'                        => $this->read->number(),
+                        'applied_limit'                => $this->read->number(),
+                        'rows_before_limit'            => $this->read->number(),
+                        'calculated_rows_before_limit' => $this->read->number(),
                     ];
                     break;
                 case Protocol::SERVER_TOTALS:
@@ -136,11 +136,11 @@ class Client
 
     private function setServerInfo()
     {
-        $this->_server_info = [
-            'name' => $this->read->string(),
+        $this->_server_info              = [
+            'name'          => $this->read->string(),
             'major_version' => $this->read->number(),
             'minor_version' => $this->read->number(),
-            'version' => $this->read->number(),
+            'version'       => $this->read->number(),
         ];
         $this->_server_info['time_zone'] = $this->gtV(self::DBMS_MIN_V_SERVER_TIMEZONE) ? $this->read->string() : '';
     }
@@ -152,8 +152,8 @@ class Client
 
     private function readErr()
     {
-        $c = $this->read->int();
-        $n = $this->read->string();
+        $c   = $this->read->int();
+        $n   = $this->read->string();
         $msg = $this->read->string();
         throw new CkException(substr($msg, strlen($n) + 1), $c);
     }
@@ -168,10 +168,10 @@ class Client
             return $code;
         }
         foreach ($this->fields as $t) {
-            $f = $this->read->string();
-            $t = $this->read->string();
+            $f   = $this->read->string();
+            $t   = $this->read->string();
             $col = $this->types->unpack($t, $row_count);
-            $i = 0;
+            $i   = 0;
             foreach ($col as $el) {
                 if ($t === 'UInt64' && isset($this->_row_data[$i + $this->_total_row - 1][$f]) && $el === 0) {
                     continue;
@@ -191,13 +191,13 @@ class Client
             return [$n, 0];
         }
         $info = [
-            'num1' => $this->read->number(),
+            'num1'         => $this->read->number(),
             'is_overflows' => $this->read->number(),
-            'num2' => $this->read->number(),
-            'bucket_num' => $this->read->int(),
-            'num3' => $this->read->number(),
-            'col_count' => $this->read->number(),
-            'row_count' => $this->read->number(),
+            'num2'         => $this->read->number(),
+            'bucket_num'   => $this->read->int(),
+            'num3'         => $this->read->number(),
+            'col_count'    => $this->read->number(),
+            'row_count'    => $this->read->number(),
         ];
         if (count($this->fields) === 0) {
             for ($i = 0; $i < $info['col_count']; $i++) {
@@ -310,7 +310,7 @@ class Client
     public function writeStart($table, $fields)
     {
         $this->fields = [];
-        $table = trim($table);
+        $table        = trim($table);
         $this->sendQuery('INSERT INTO ' . $table . ' (' . implode(',', $fields) . ') VALUES ');
         $this->writeEnd(false);
         while (true) {

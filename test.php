@@ -45,7 +45,7 @@ $table                = [
     '`f27` Array(Int32),',
     '`f28` Array(Array(Array(Nullable(Date)))),',
     '`f29` Array(Array(Array(Array(Array(Nullable(Datetime))))))',
-    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
+    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192',
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
 
@@ -80,7 +80,7 @@ $data['insert data'] = $ck->insert('t6', [
         'f26' => 'eee',
         'f27' => [0, -2, 3, 4, 5, 6, 7, 8, 64],
         'f28' => [[['2020-01-05', null, '2020-01-06']], [['2020-01-07'], ['2020-01-08']], [['2020-01-09']]],
-        'f29' => [[[[["2020-01-05 05:05:05", null, "2020-01-06 15:16:17"]], [["2020-01-07 18:19:20"], ["2020-01-08 21:22:23"]], [["2020-01-09 00:00:00"]]], [[["2020-01-10 01:00:00", null]]]], [[[["2020-01-11 00:00:01", null, "2020-01-12 11:01:58"]], [["2020-01-13 21:22:01"]]]]]
+        'f29' => [[[[["2020-01-05 05:05:05", null, "2020-01-06 15:16:17"]], [["2020-01-07 18:19:20"], ["2020-01-08 21:22:23"]], [["2020-01-09 00:00:00"]]], [[["2020-01-10 01:00:00", null]]]], [[[["2020-01-11 00:00:01", null, "2020-01-12 11:01:58"]], [["2020-01-13 21:22:01"]]]]],
     ],
     [
         'id'  => 2,
@@ -112,7 +112,7 @@ $data['insert data'] = $ck->insert('t6', [
         'f26' => 'eee22',
         'f27' => [1, 2, 3, 4],
         'f28' => [[['2020-01-05', '2020-01-06']], [['2020-01-07', null], ['2020-01-08']], [['2020-01-09']]],
-        'f29' => [[[[[null]]]]]
+        'f29' => [[[[[null]]]]],
     ],
     [
         'id'  => 3,
@@ -144,8 +144,8 @@ $data['insert data'] = $ck->insert('t6', [
         'f26' => 'eee22',
         'f27' => [12344],
         'f28' => [[['2020-01-05', '2020-01-06'], [null]], [['2020-01-07'], ['2020-01-08']], [['2020-01-09']]],
-        'f29' => [[[[['2018-01-25 11:25:14']]]]]
-    ]
+        'f29' => [[[[['2018-01-25 11:25:14']]]]],
+    ],
 ]);
 
 
@@ -177,7 +177,7 @@ $table                = [
     '`id` UInt32,',
     '`f1` UInt16,',
     '`f2` Datetime',
-    ') ENGINE = MergeTree() ORDER BY (id, f1) SETTINGS index_granularity = 8192'
+    ') ENGINE = MergeTree() ORDER BY (id, f1) SETTINGS index_granularity = 8192',
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
 
@@ -185,53 +185,53 @@ $data['insert data'] = $ck->insert('t5', [
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => '2020-09-29 14:25:12.258'
+        'f2' => '2020-09-29 14:25:12.258',
     ],
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => '2020-09-29 14:30:56.873'
+        'f2' => '2020-09-29 14:30:56.873',
     ],
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => '2020-09-29 14:35:46.456'
+        'f2' => '2020-09-29 14:35:46.456',
     ],
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => '2020-09-29 14:40:16.387'
+        'f2' => '2020-09-29 14:40:16.387',
     ],
     [
         'id' => 1,
         'f1' => 1,
-        'f2' => '2020-09-29 14:45:22.111'
-    ]
+        'f2' => '2020-09-29 14:45:22.111',
+    ],
 ]);
 
 $data['select t5 saf'] = $ck->query("select id,f1,max(f2) from t5 group by id, f1");
 
 // flow of  write
-$data['drop table'] = $ck->query('DROP TABLE IF EXISTS t7');
+$data['drop table']   = $ck->query('DROP TABLE IF EXISTS t7');
 $table                = [
     'CREATE TABLE t7 (',
     '`id` UInt32,',
     '`f2` Nullable(Int32),',
     '`f5` UInt16,',
     '`f15` String',
-    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192'
+    ') ENGINE = MergeTree() ORDER BY id SETTINGS index_granularity = 8192',
 ];
 $data['create table'] = $ck->query(implode("\n", $table));
 
-$ck->writeStart('t7',['id','f2','f5','f15']);
+$ck->writeStart('t7', ['id', 'f2', 'f5', 'f15']);
 for ($i = 0; $i < 100; $i++) {
     $da = [];
     for ($j = 0; $j < 1000; $j++) {
         $da[] = [
-            'id' => mt_rand(1,1000000),
-            'f2' => mt_rand(-1000000,1000000),
-            'f5' => mt_rand(1,10000),
-            'f15' => md5(mt_rand(1,10000))
+            'id'  => mt_rand(1, 1000000),
+            'f2'  => mt_rand(-1000000, 1000000),
+            'f5'  => mt_rand(1, 10000),
+            'f15' => md5(mt_rand(1, 10000)),
         ];
     }
     $ck->writeBlock($da);
