@@ -1,0 +1,27 @@
+{
+  "name": "caiqing123/one-ck",
+  "description": "clickhouse tcp client",
+  "type": "library",
+  "keywords": [
+    "php",
+    "tcp",
+    "client",
+    "clickhouse"
+  ],
+  "license": "Apache-2.0",
+  "require": {
+    "php": ">=5.5",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "OneCk\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "caiqinglin",
+      "email": "925648047@qq.com"
+    }
+  ]
+}
